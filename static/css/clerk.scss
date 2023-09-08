@@ -1,0 +1,239 @@
+.cl-card *:focus {
+	box-shadow: none !important;
+}
+
+.cl-loading path {
+	fill: var(--text-color);
+}
+
+.cl-signIn-root > .cl-card {
+	box-shadow: 0px 4px 10px 3px var(--shadow-color);
+	background-color: var(--background-color);
+
+	& a {
+		border-bottom: none;
+
+		&:hover {
+			padding-bottom: initial !important;
+
+			& p {
+				color: var(--color) !important;
+			}
+		}
+	}
+
+	& > div:last-child:not(.🔒️) {
+		background: no-repeat;
+		color: var(--text-color);
+		display: flex;
+		flex-direction: column;
+		transform: none;
+		bottom: 2rem;
+		right: 1rem;
+		position: absolute;
+		top: inherit;
+		left: inherit;
+		border: none;
+
+		& p {
+			color: var(--text-faded-color);
+		}
+	}
+}
+
+.cl-footerActionText, .cl-footerActionLink, .cl-headerSubtitle, .cl-formFieldAction, .cl-breadcrumbsItemDivider {
+	color: var(--text-faded-color) !important;
+}
+
+.cl-footerActionLink:hover {
+	color: var(--color) !important;
+	text-decoration: none;
+}
+
+.cl-headerTitle {
+	text-align: left;
+}
+
+.cl-headerTitle, .cl-dividerText, .cl-formFieldLabel, .cl-identityPreviewText, .cl-alternativeMethodsBlockButton, .cl-userPreviewMainIdentifier, .cl-userPreviewSecondaryIdentifier, .cl-userButtonPopoverActionButtonText, .cl-modalCloseButton, .cl-profileSectionTitleText, .cl-breadcrumbsItem {
+	color: var(--text-color);
+}
+
+.cl-userButtonPopoverActionButtonIcon path {
+	fill: var(--text-color);
+}
+
+.cl-userButtonPopoverActionButton:last-child .cl-userButtonPopoverActionButtonText, 
+.cl-userButtonPopoverActionButton:last-child .cl-userButtonPopoverActionButtonIcon path {
+	fill: #dc3545;
+	color: #dc3545;
+}
+
+.cl-userButtonPopoverActionButton:hover {
+	background-color: var(--background-color-1);
+}
+
+.cl-userButtonTrigger {
+	transition: transform .2s ease-in-out;
+
+	&:focus {
+		box-shadow: none;
+	}
+
+	&:active {
+		transform: scale(1.1);
+	}
+}
+
+.cl-userButtonPopoverFooter {
+	& p {
+		color: var(--text-faded-color);
+	}
+
+	& a {
+		border-bottom: none;
+	}
+}
+
+.cl-userPreviewSecondaryIdentifier::before {
+	content: "@";
+}
+
+.cl-dividerLine {
+	background-color: var(--text-faded-color);
+}
+
+.cl-identityPreview {
+	border-color: var(--text-faded-color);
+}
+
+.cl-headerBackRow a {
+	transition: color .1s ease-in-out !important;
+	
+	& p {
+		transition: color .1s ease-in-out !important;
+	}
+
+	&:hover {
+		text-decoration: none;
+	}
+}
+
+:root[data-theme="dark"] {
+	.cl-socialButtonsProviderIcon__github, .cl-fileDropAreaIcon {
+		filter: invert(1);
+	}
+
+	.cl-socialButtonsIconButton {
+		background: var(--background-color-1);
+		border: 1px solid var(--input-border);
+		transition: background 0.2s ease-in-out;
+
+		&:hover {
+			background: var(--background-color-2);
+		}
+	}
+
+	.cl-identityPreviewEditButtonIcon, .cl-formFieldInputShowPasswordIcon, .cl-providerIcon__github {
+		filter: invert(1);
+	}
+}
+
+.cl-userButtonPopoverCard {
+	background-color: var(--background-color);
+	box-shadow: 0px 4px 10px 3px var(--shadow-color);
+}
+
+.cl-userProfile-root .cl-card {
+	background-color: var(--background-color);
+
+	& a {
+		border-bottom: none;
+
+		&:hover {
+			padding-bottom: initial !important;
+
+			& p {
+				color: var(--color) !important;
+			}
+		}
+	}
+
+	& > div:last-child:not(.🔒️) {
+		background: no-repeat;
+		color: var(--text-color);
+		display: flex;
+		flex-direction: column;
+		transform: none;
+		bottom: 1rem;
+		left: 0rem;
+		position: absolute;
+		top: inherit;
+		left: inherit;
+		border: none;
+
+		& p {
+			color: var(--text-faded-color);
+		}
+	}
+
+	& .cl-navbarButton {
+		color: var(--text-color);
+
+		&.cl-active, &:hover {
+			background-color: var(--background-color-1);
+		}
+
+		&:focus {
+			box-shadow: none;
+		}
+	}
+
+	& .cl-page p {
+		color: var(--text-color);
+	}
+
+	& .cl-navbarButtonIcon path, & .cl-accordionTriggerButton > svg > path {
+		fill: var(--text-color);
+	}
+
+	& .cl-profileSectionPrimaryButton {
+		--accent: #007bff;
+
+		& path {
+			fill: var(--accent);
+		}
+	}
+
+	& p[data-localization-key="userProfile.profilePage.imageFormTitle"], & span[data-localization-key="userProfile.connectedAccountPage.socialButtonsBlockButton"] {
+		color: var(--text-color);
+	}
+
+	& svg[stroke="currentColor"] {
+		stroke: var(--text-color);
+	}
+
+	& span[data-localization-key="badge__thisDevice"] {
+		color: #1e7e34;
+		--bg: #28a74533;
+	}
+
+	& button[data-localization-key="userProfile.profilePage.imageFormSubtitle"] {
+		color: #007bff;
+
+		&:hover {
+			background-color: initial;
+		}
+	}
+
+	& button[data-localization-key="userProfile.profilePage.imageFormDestructiveActionSubtitle"] {
+		color: #dc3545;
+		
+		&:hover {
+			background-color: initial;
+		}
+	}
+
+	& .cl-profileSectionContent p, & .cl-accordionTriggerButton {
+		color: var(--text-color);
+	}
+}

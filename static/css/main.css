@@ -1,0 +1,15 @@
+:root {
+	--red-faded: rgba(255, 0, 0, 0.2);
+	--red: #ff0000;
+	--orange-faded: rgba(255, 106, 0, 0.2);
+	--orange: #ff8000;
+	--yellow-faded: rgba(255, 255, 0, 0.2);
+	--yellow: #ffff00;
+	--green-faded: rgba(0, 128, 0, 0.2);
+	--green: #008000;
+}
+
+.material-icons {
+	user-select: none;
+	width: 24px;
+}
