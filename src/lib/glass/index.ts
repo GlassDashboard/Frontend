@@ -160,6 +160,20 @@ export const Glass = {
 							})
 							.then((r) => r.data)
 							.catch((e) => null);
+					},
+
+					uploadMultiple: async (file: File[]) => {
+						const formData = new FormData();
+						file.forEach((f) => formData.append('files', f));
+
+						return (await getAxios())
+							.post(`/server/${server}/file/${path}`, formData, {
+								headers: {
+									'Content-Type': 'multipart/form-data'
+								}
+							})
+							.then((r) => r.data)
+							.catch((e) => null);
 					}
 				};
 			},

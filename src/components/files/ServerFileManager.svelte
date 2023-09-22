@@ -23,6 +23,13 @@
 	import { goto } from '$app/navigation';
 	import type { PageData } from '../../routes/$types';
 	import Glass from '$lib/glass';
+	import Dropzone from 'dropzone';
+	import { dropzone } from '../../stores/dropzone';
+	import Note from '../styling/Note.svelte';
+	import { FileUploadQueue } from '$lib/logic';
+	import SignIn from '../clerk/SignIn.svelte';
+	import Loader from '../styling/Loader.svelte';
+	import UploadProgress from '../styling/UploadProgress.svelte';
 
 	export let server: Server;
 	export let data: PageData;
@@ -55,6 +62,8 @@
 				metadata.set(data);
 			});
 	};
+
+	$: urlPath = $path.replace(/^\//, '');
 
 	const setPath = (location: string) => {
 		fetch(location);
@@ -153,7 +162,51 @@
 		}
 	};
 
-	const upload = () => {
+	const upload = (
+		files: globalThis.File[],
+		callback: () => void = () => {}
+	) => {
+		const percent = 100 - (uploadQueue.size() / uploadQueue.total()) * 100;
+		queueStore.set(percent);
+
+		const directories = Array.from(
+			new Set(
+				files.map((file) => {
+					const directory = file.webkitRelativePath.substring(
+						0,
+						file.webkitRelativePath.lastIndexOf('/')
+					);
+
+					return !directory ? urlPath : urlPath + '/' + directory;
+				})
+			)
+		);
+
+		for (const directory of directories) {
+			Glass.server(server.id)
+				.file(directory)
+				.uploadMultiple(
+					files.filter((file) => file.webkitRelativePath.startsWith(directory))
+				)
+				.then(() => {
+					callback();
+				});
+		}
+	};
+
+	const uploadQueue = new FileUploadQueue(75, 250, async (files) => {
+		await upload(files);
+
+		if (uploadQueue.size() === 0)
+			setTimeout(() => {
+				manager.reload();
+				queueStore.set(-1);
+			}, 100);
+	});
+
+	const queueStore = writable<number>(-1);
+
+	const uploadFile = () => {
 		const input = document.createElement('input');
 		input.type = 'file';
 		input.multiple = true;
@@ -162,7 +215,7 @@
 		input.addEventListener('change', () => {
 			if (!input.files) return;
 			const files = Array.from(input.files);
-			Glass.server(server.id).file('file.txt').write('Hello World!');
+			uploadQueue.pushAll(files);
 		});
 	};
 
@@ -174,19 +227,47 @@
 		setTimeout(() => {
 			fetch($path);
 		}, 200);
+
+		// Attach dropzone
+		Dropzone.autoDiscover = false;
+
+		if (!$dropzone)
+			dropzone.set(
+				new Dropzone('.app', {
+					url: '#',
+					uploadMultiple: true,
+					parallelUploads: 10,
+					autoProcessQueue: false,
+					addRemoveLinks: true,
+					// @ts-ignore
+					disablePreviews: true,
+					clickable: false,
+					init: function () {
+						this.on('addedfile', (file) => {
+							uploadQueue.push(file);
+						});
+
+						this.on('complete', (file) => {
+							this.removeFile(file);
+						});
+					}
+				})
+			);
+		else $dropzone?.enable();
 	});
 
 	onDestroy(() => {
 		$socket?.emit('server:detach');
 		document.removeEventListener('keydown', onKeyToggle);
 		document.removeEventListener('keyup', onKeyToggle);
+		$dropzone?.disable();
 	});
 
 	setContext(FILE_MANAGER, manager);
 </script>
 
 <svelte:head>
-	<link rel="stylesheet" href="/context-menu/theme.css" />
+	<link rel="stylesheet" href="/css/dropzone.css" />
 </svelte:head>
 
 <div bind:this={div} class="manager">
@@ -195,9 +276,13 @@
 		<Breadcrumbs path={$path} />
 		<div class="controls">
 			<div class="control">
-				<span on:click={() => upload()} class="material-icons icon"
-					>file_upload</span
-				>
+				{#if $queueStore != -1}
+					<UploadProgress progress={queueStore} />
+				{:else}
+					<span on:click={() => uploadFile()} class="material-icons icon"
+						>file_upload</span
+					>
+				{/if}
 			</div>
 		</div>
 	</div>
@@ -211,9 +296,16 @@
 			<File metadata={file} />
 		</div>
 	{/each}
+	<div class="note">
+		<Note>File uploads are limited to 100MB</Note>
+	</div>
 </div>
 
 <style lang="scss">
+	.note {
+		margin-top: 1rem;
+	}
+
 	.header {
 		display: flex;
 		align-items: center;
