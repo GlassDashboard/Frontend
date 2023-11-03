@@ -41,6 +41,12 @@ async function getAxios() {
 }
 
 export const Glass = {
+	async ping(): Promise<boolean> {
+		return (await getAxios())
+			.get('/ping')
+			.then((r) => !r.data.error)
+			.catch((e) => false);
+	},
 	user: {
 		async getAllServers(): Promise<ServerDetails[] | []> {
 			return (await getAxios())

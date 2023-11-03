@@ -13,3 +13,8 @@
 	user-select: none;
 	width: 24px;
 }
+
+*[class^='gg-'],
+*[class*=' gg-'] {
+	display: inline-block !important;
+}

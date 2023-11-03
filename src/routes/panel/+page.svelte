@@ -5,11 +5,18 @@
 	import ServerRow from '../../components/rows/ServerRow.svelte';
 	import Skeleton from '../../components/styling/Skeleton.svelte';
 	import CreateRow from '../../components/rows/CreateRow.svelte';
+	import Note from '../../components/styling/Note.svelte';
+	import Error from '../../components/styling/Error.svelte';
 
 	let loading = true;
+	let reachable = true;
 	let servers: ServerDetails[] = [];
 
 	(async () => {
+		// Check if the backend is reachable
+		reachable = await Glass.ping();
+		if (!reachable) return;
+
 		servers = await Glass.user.getAllServers();
 		loading = false;
 	})();
@@ -22,7 +29,9 @@
 <main>
 	<RowHeader title="Your Servers" />
 
-	{#if loading}
+	{#if !reachable}
+		<Error title="Failed to reach Glass" />
+	{:else if loading}
 		{#each { length: 2 } as _, i}
 			<Skeleton height="64px" index={i} />
 		{/each}
@@ -34,7 +43,7 @@
 	{/if}
 </main>
 
-<style>
+<style lang="scss">
 	main {
 		flex: 1;
 		display: flex;

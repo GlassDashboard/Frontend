@@ -2,11 +2,13 @@
 	import type { FileMetadata } from '$lib/glass/interfaces';
 
 	export let metadata: FileMetadata;
-	$: icon = metadata.directory ? 'folder' : 'insert_drive_file';
+	$: icon = metadata.directory ? 'folder' : 'file';
 </script>
 
 <div>
-	<span class="material-icons icon {icon}">{icon}</span>
+	<div class="icon">
+		<span class="gg-{icon}" />
+	</div>
 	{metadata.name}
 </div>
 
@@ -21,11 +23,16 @@
 	}
 
 	.icon {
-		&.folder {
+		width: 24px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+
+		& .gg-folder {
 			color: #ffa900;
 		}
 
-		&.insert_drive_file {
+		& .gg-file {
 			color: #9e9e9e;
 		}
 	}

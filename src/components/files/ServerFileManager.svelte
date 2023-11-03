@@ -30,6 +30,7 @@
 	import SignIn from '../clerk/SignIn.svelte';
 	import Loader from '../styling/Loader.svelte';
 	import UploadProgress from '../styling/UploadProgress.svelte';
+	import Skeleton from '../styling/Skeleton.svelte';
 
 	export let server: Server;
 	export let data: PageData;
@@ -99,7 +100,10 @@
 			setPath(($path == '/' ? '/' : $path + '/') + location.replace(/^\//, ''));
 		},
 		getSelected: () => selected,
-		reload: () => fetch($path),
+		reload: () => {
+			fetch($path);
+			reset();
+		},
 		isRoot: () => $path === '/'
 	};
 
@@ -219,6 +223,19 @@
 		});
 	};
 
+	const deleteFiles = () => {
+		let remaining = selected.length;
+		for (const file of selected) {
+			Glass.server(server.id)
+				.file(file.path)
+				.delete()
+				.then(() => {
+					remaining--;
+					if (remaining === 0) manager.reload();
+				});
+		}
+	};
+
 	onMount(() => {
 		document.addEventListener('keydown', onKeyToggle);
 		document.addEventListener('keyup', onKeyToggle);
@@ -279,11 +296,14 @@
 				{#if $queueStore != -1}
 					<UploadProgress progress={queueStore} />
 				{:else}
-					<span on:click={() => uploadFile()} class="material-icons icon"
-						>file_upload</span
-					>
+					<span on:click={() => uploadFile()} class="gg-software-upload icon" />
 				{/if}
 			</div>
+			{#if $masterState}
+				<div class="red control">
+					<span on:click={() => deleteFiles()} class="gg-trash icon" />
+				</div>
+			{/if}
 		</div>
 	</div>
 
@@ -338,6 +358,8 @@
 
 	.controls {
 		margin-left: auto;
+		display: flex;
+		gap: 1rem;
 
 		& > .control {
 			display: flex;
@@ -347,6 +369,10 @@
 
 			&:hover {
 				color: var(--color);
+			}
+
+			&.red {
+				--color: #d02f19;
 			}
 		}
 	}
