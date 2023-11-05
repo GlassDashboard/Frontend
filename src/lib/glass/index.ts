@@ -1,10 +1,8 @@
 import type Clerk from '@clerk/clerk-js';
 import { clerk } from '../../stores/clerk';
-import Axios, { type AxiosInstance } from 'axios';
 import type { ServerDetails, Server } from '$lib/glass/interfaces';
 import { PUBLIC_GLASS_API } from '$env/static/public';
-
-let axios: AxiosInstance | null = null;
+import axios, { type AxiosInstance, Axios } from 'axios';
 
 async function getClerk(): Promise<Clerk | null> {
 	return new Promise((resolve, _) => {
@@ -16,28 +14,30 @@ async function getClerk(): Promise<Clerk | null> {
 	});
 }
 
-const getToken = async () => {
+async function generateToken() {
 	const clerk = await getClerk();
-	return (await clerk?.session?.getToken()) ?? null;
-};
+	if (!clerk) return null;
 
-async function getAxios() {
-	if (axios) return axios;
+	return clerk.session?.getToken();
+}
 
-	axios = Axios.create({
+let token: string;
+let axiosInstance: AxiosInstance;
+
+async function getAxios(): Promise<AxiosInstance> {
+	if (axiosInstance) return axiosInstance;
+	token = (await generateToken()) ?? '';
+
+	axiosInstance = axios.create({
 		baseURL: PUBLIC_GLASS_API,
 		headers: {
 			Accept: 'application/json',
 			'Content-Type': 'application/json',
-			Authorization: `Bearer ${await getToken()}`
+			Authorization: `Bearer ${token}`
 		}
 	});
 
-	setTimeout(() => {
-		axios = null;
-	}, 50000);
-
-	return axios;
+	return axiosInstance;
 }
 
 export const Glass = {
@@ -63,7 +63,7 @@ export const Glass = {
 		},
 
 		async getToken(): Promise<string | null> {
-			return getToken();
+			return token;
 		}
 	},
 	server: (server: string) => {
@@ -94,6 +94,15 @@ export const Glass = {
 					.post(`/server/${server}`)
 					.then((r) => r.data)
 					.catch((e) => null);
+			},
+
+			users: {
+				getAll: async () => {
+					return (await getAxios())
+						.get(`/server/${server}/user/all`)
+						.then((r) => r.data)
+						.catch((e) => null);
+				}
 			},
 
 			file: (path: string) => {
