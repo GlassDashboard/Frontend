@@ -1,9 +1,19 @@
 <script lang="ts">
+	import { createEventDispatcher } from 'svelte';
+
 	export let name: string;
 	export let selected: boolean;
+
+	const dispatcher = createEventDispatcher<{ click: string }>();
+
+	const handleClick = (e: KeyboardEvent) => {
+		if (e.key !== 'Enter') return;
+		dispatcher('click', name);
+	};
 </script>
 
-<div class:selected on:click>
+<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+<div tabindex="0" class:selected on:click on:keydown={handleClick}>
 	{name}
 </div>
 
