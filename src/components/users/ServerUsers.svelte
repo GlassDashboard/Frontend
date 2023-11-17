@@ -4,7 +4,9 @@
 	import { onMount } from 'svelte';
 	import User from './User.svelte';
 	import Skeleton from '../styling/Skeleton.svelte';
+	import { Logger } from '$lib/logger';
 
+	const logger = new Logger('users');
 	export let server: Server;
 	let users: Subuser[] | null = null;
 
@@ -12,6 +14,8 @@
 		Glass.server(server.id)
 			.users.getAll()
 			.then((u) => {
+				if (u == null) return logger.errorThenRetry('Failed to fetch users');
+
 				users = [
 					...u,
 					{

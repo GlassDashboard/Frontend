@@ -1,21 +1,7 @@
 <script lang="ts">
 	import type { Subuser } from '$lib/glass/interfaces';
-	import { onMount } from 'svelte';
-	import Modal from '../styling/Modal.svelte';
-
 	export let user: Subuser;
-
-	onMount(() => {
-		setTimeout(() => {
-			//@ts-ignore
-			MiniCSS.openModal('user-' + user.id);
-		}, 1000);
-	});
 </script>
-
-<Modal id="user-{user.id}" title="Manage {user.username}">
-	<h2>Hello world :)</h2>
-</Modal>
 
 <div class="user">
 	<img src={user.avatar} alt={user.username} width="48px" />
@@ -103,7 +89,7 @@
 				}
 
 				&.modify {
-					color: #3f51b5;
+					color: #3a97b9;
 				}
 
 				&[disabled] {

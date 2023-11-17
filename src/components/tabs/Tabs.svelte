@@ -26,6 +26,7 @@
 	import TabHeader from './TabHeader.svelte';
 	import type { PageData } from '../../routes/panel/[server]/[...tab]/[...data]/$types';
 	import { goto } from '$app/navigation';
+	import { Logger } from '$lib/logger';
 
 	export let initial: string | null = null;
 	export let data: PageData;
@@ -34,6 +35,7 @@
 	let names: Writable<string[]> = writable([]);
 	let current = writable(0);
 
+	const logger = new Logger('tab-manager');
 	const dispatcher = createEventDispatcher<{ change: string }>();
 	const getIndex = (tab: string) => $tabs.indexOf(tab.toLowerCase());
 
@@ -45,10 +47,14 @@
 			current.set(getIndex(tab));
 			dispatcher('change', tab);
 			urlHandler.updateTab(tab);
+
+			logger.info(`Tab changed to ${tab}`);
 		},
 		exists: (tab: string) => getIndex(tab) !== -1,
 		isSelected: (tab: string) => getIndex(tab) === $current,
 		register: (key: string) => {
+			if ($names.includes(key)) $names.splice($names.indexOf(key), 1);
+
 			$names.push(key);
 			names.set($names);
 			tabs.set($names.filter((n) => !!n).map((name) => name.toLowerCase()));
@@ -58,7 +64,10 @@
 		},
 		loadFromTab: () => {
 			const tab = urlHandler.getCurrentTab();
-			if (!tab || !manager.exists(tab)) return;
+			if (!tab || !manager.exists(tab))
+				return logger.warn(
+					`Tab ${tab} does not exist, failed to import from url`
+				);
 
 			manager.set(tab);
 		}
@@ -72,13 +81,17 @@
 		},
 		updateTab: (tab: string, showFirst: boolean = false) => {
 			if (!manager.exists(tab)) return;
-			const url = data.current
+			let url = data.current
 				?.replace('[...data]', '')
 				?.replace(
 					'[...tab]',
 					manager.index(tab) == 0 && !showFirst ? '' : tab.toLowerCase()
 				)
 				?.replace('[server]', data.server);
+
+			if (url?.endsWith('//')) url = url.slice(0, -1);
+
+			logger.info(`URL updating to ${url}`);
 
 			if (!url) return;
 			goto(url, {
