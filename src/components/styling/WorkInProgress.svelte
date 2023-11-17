@@ -24,6 +24,7 @@
 		& p {
 			font-size: 1.5rem;
 			color: var(--text-faded-color);
+			font-family: 'Open Sans', sans-serif;
 		}
 	}
 

@@ -18,26 +18,12 @@
 	export let data: PageData;
 	$: server = $serverStore!;
 	$: isAdmin = $clerk!.user?.publicMetadata['admin'];
-
-	const tabChange = (event: CustomEvent<string>) => {
-		const key = event.detail == 'Console' ? '' : event.detail.toLowerCase();
-
-		const url = data.current
-			?.replace('[...tab]', key)
-			.replace('[...data]', '')
-			.replace('[server]', server.id);
-
-		// if (url)
-		// 	goto(url, {
-		// 		replaceState: false
-		// 	});
-	};
 </script>
 
 <main class="big">
 	<ServerHeader />
 	<div>
-		<Tabs initial={tab} on:change={tabChange} bind:this={tabs}>
+		<Tabs initial={tab} bind:this={tabs} {data}>
 			<Tab key="Console"><ServerConsole {server} /></Tab>
 			<Tab key="Files"><ServerFileManager {server} {data} /></Tab>
 			<Tab key="Players"><WorkInProgress /></Tab>

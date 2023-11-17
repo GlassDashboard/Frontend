@@ -44,3 +44,15 @@ export interface FileMetadata {
 	content: string | null;
 	children: FileMetadata[];
 }
+
+/**
+ * @interface Subuser
+ * @description Minimal details about subusers associated with a server.
+ */
+export interface Subuser {
+	id: string;
+	permissions: bigint;
+	username: string;
+	avatar: string;
+	owner: boolean;
+}
