@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { handleTabCompletion } from '$lib/logic';
 	import { createEventDispatcher } from 'svelte';
 	import { writable } from 'svelte/store';
 
@@ -13,7 +14,8 @@
 </script>
 
 <!--  a11y-click-events-have-key-events -->
-<div on:click={click} on:click>
+<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+<div on:click={click} on:click on:keydown={handleTabCompletion} tabindex="0">
 	<div class="checkbox" class:active={$state}>
 		{#if $state}
 			<svg viewBox="0 0 24 24">
