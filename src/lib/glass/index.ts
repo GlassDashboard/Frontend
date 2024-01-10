@@ -40,7 +40,8 @@ async function getAxios(): Promise<AxiosInstance> {
 			Accept: 'application/json',
 			'Content-Type': 'application/json',
 			Authorization: `Bearer ${token}`
-		}
+		},
+		timeout: 5000
 	});
 
 	return axiosInstance;

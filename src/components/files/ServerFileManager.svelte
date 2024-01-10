@@ -27,8 +27,6 @@
 	import { dropzone } from '../../stores/dropzone';
 	import Note from '../styling/Note.svelte';
 	import { FileUploadQueue } from '$lib/logic';
-	import SignIn from '../clerk/SignIn.svelte';
-	import Loader from '../styling/Loader.svelte';
 	import UploadProgress from '../styling/UploadProgress.svelte';
 	import Skeleton from '../styling/Skeleton.svelte';
 
@@ -40,6 +38,7 @@
 	let checkboxes: Checkbox[] = [];
 	let selected: FileMetadata[] = [];
 	let shifting: boolean = false;
+	let loading: boolean = true;
 	let lastFile: FileMetadata | null = null;
 	let lastClick: number = 0;
 	let masterState: Writable<boolean> | undefined = undefined;
@@ -56,10 +55,19 @@
 	};
 
 	const fetch = (path: string) => {
+		loading = true;
 		$socket
 			?.timeout(5000)
 			.emit('file:metadata', path, (err: Error, data: FileMetadata) => {
-				if (err) return;
+				if (err) {
+					setTimeout(() => {
+						fetch(path);
+					}, 1000);
+
+					return console.error(err);
+				}
+
+				loading = false;
 				metadata.set(data);
 			});
 	};
@@ -307,15 +315,22 @@
 		</div>
 	</div>
 
-	{#each children as file, index}
-		<div class="file" on:click={() => handleClick(file)}>
-			<Checkbox
-				bind:this={checkboxes[index]}
-				on:state={(e) => handleCheckbox(e, file)}
-			/>
-			<File metadata={file} />
-		</div>
-	{/each}
+	{#if loading}
+		{#each { length: 10 } as _, index}
+			<Skeleton height={'2rem'} index={index / 2} />
+		{/each}
+	{:else}
+		{#each children as file, index}
+			<div class="file" on:click={() => handleClick(file)}>
+				<Checkbox
+					bind:this={checkboxes[index]}
+					on:state={(e) => handleCheckbox(e, file)}
+				/>
+				<File metadata={file} />
+			</div>
+		{/each}
+	{/if}
+
 	<div class="note">
 		<Note>File uploads are limited to 100MB</Note>
 	</div>

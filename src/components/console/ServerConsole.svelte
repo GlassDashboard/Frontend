@@ -66,7 +66,11 @@
 		Glass.server(server.id)
 			.console.history()
 			.then((logs) => {
-				if (!logs) return setTimeout(() => fetchLogs(success), 1000);
+				if (!logs) {
+					setTimeout(() => fetchLogs(success), 1000);
+					return console.error('Failed to fetch logs');
+				}
+
 				success(logs);
 			});
 	};
