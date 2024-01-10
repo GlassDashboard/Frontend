@@ -1,6 +1,17 @@
 <script lang="ts">
 	import type { Subuser } from '$lib/glass/interfaces';
+	import { createEventDispatcher } from 'svelte';
+
 	export let user: Subuser;
+	export let controls: boolean = true;
+
+	const dispatcher = createEventDispatcher<{
+		remove: Subuser;
+		modify: Subuser;
+	}>();
+
+	const remove = () => dispatcher('remove', user);
+	const modify = () => dispatcher('modify', user);
 </script>
 
 <div class="user">
@@ -15,15 +26,19 @@
 		{/if}
 	</div>
 
-	<div class="buttons">
-		{#if user.owner}
-			<button class="modify" disabled><i class="gg-options" /></button>
-			<button class="remove" disabled><i class="gg-trash" /></button>
-		{:else}
-			<button class="modify"><i class="gg-options" /></button>
-			<button class="remove"><i class="gg-trash" /></button>
-		{/if}
-	</div>
+	{#if controls}
+		<div class="buttons">
+			{#if user.owner}
+				<button class="modify" disabled><i class="gg-options" /></button>
+				<button class="remove" disabled><i class="gg-trash" /></button>
+			{:else}
+				<button class="modify" on:click={modify}
+					><i class="gg-options" /></button
+				>
+				<button class="remove" on:click={remove}><i class="gg-trash" /></button>
+			{/if}
+		</div>
+	{/if}
 </div>
 
 <style lang="scss">

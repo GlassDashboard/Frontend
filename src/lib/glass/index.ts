@@ -21,6 +21,12 @@ async function generateToken() {
 	return clerk.session?.getToken();
 }
 
+function parsePermission(value: string | bigint): bigint {
+	if (typeof value === 'bigint') return value;
+	if (!value.startsWith('bi:')) return 0n;
+	return BigInt(value.slice(3));
+}
+
 let token: string;
 let axiosInstance: AxiosInstance;
 
@@ -100,7 +106,12 @@ export const Glass = {
 				getAll: async () => {
 					return (await getAxios())
 						.get(`/server/${server}/user/all`)
-						.then((r) => r.data)
+						.then((r) =>
+							r.data.map((u) => ({
+								...u,
+								permissions: parsePermission(u.permissions)
+							}))
+						)
 						.catch((e) => null);
 				}
 			},

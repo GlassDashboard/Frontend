@@ -59,3 +59,10 @@ export class FileUploadQueue {
 		return this.uploading;
 	}
 }
+
+export const handleTabCompletion = (e: KeyboardEvent) => {
+	if (e.key != 'Enter') return;
+	const element = e.target as HTMLElement;
+
+	element.dispatchEvent(new Event('click'));
+};
