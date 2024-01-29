@@ -1,7 +1,6 @@
 <script lang="ts">
 	import Glass from '$lib/glass';
 	import PageLoader from '../../../../../components/styling/PageLoader.svelte';
-	import SocketProvider from '../../../../../providers/SocketProvider.svelte';
 	import { server } from '../../../../../stores/server';
 
 	import type { LayoutData } from '../../$types';
@@ -30,4 +29,3 @@
 {:else}
 	<slot />
 {/if}
-<SocketProvider />

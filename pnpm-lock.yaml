@@ -14,6 +14,9 @@ dependencies:
   dropzone:
     specifier: 6.0.0-beta.2
     version: 6.0.0-beta.2
+  monaco-editor:
+    specifier: ^0.45.0
+    version: 0.45.0
   sass:
     specifier: ^1.62.1
     version: 1.62.1
@@ -1215,6 +1218,10 @@ packages:
     dependencies:
       minimist: 1.2.8
     dev: true
+
+  /monaco-editor@0.45.0:
+    resolution: {integrity: sha512-mjv1G1ZzfEE3k9HZN0dQ2olMdwIfaeAAjFiwNprLfYNRSz7ctv9XuCT7gPtBGrMUeV1/iZzYKj17Khu1hxoHOA==}
+    dev: false
 
   /mri@1.2.0:
     resolution: {integrity: sha512-tzzskb3bG8LvYGFF/mDTpq3jpI6Q9wc3LEmBaghu+DdCssd1FakN7Bc0hVNmEyGq1bq3RgfkCb3cmQLpNPOroA==}

@@ -2,16 +2,20 @@
 	import Logo from './Logo.svelte';
 	import SignedIn from '../clerk/SignedIn.svelte';
 	import UserButton from '../clerk/UserButton.svelte';
+	import { clerk } from '../../stores/clerk';
 
 	export let link: string = '/';
+	$: console.log(`Header link: ${link}`);
 </script>
 
 <header>
 	<Logo text={true} {link} />
 
-	<SignedIn>
-		<UserButton />
-	</SignedIn>
+	{#if $clerk}
+		<SignedIn clerk={$clerk}>
+			<UserButton />
+		</SignedIn>
+	{/if}
 </header>
 
 <style>

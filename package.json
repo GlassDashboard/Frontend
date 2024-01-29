@@ -28,6 +28,7 @@
 		"@clerk/clerk-js": "^4.44.0",
 		"axios": "^1.4.0",
 		"dropzone": "6.0.0-beta.2",
+		"monaco-editor": "^0.45.0",
 		"sass": "^1.62.1",
 		"socket.io-client": "^4.7.2",
 		"xterm": "^5.2.1",

@@ -4,11 +4,13 @@
 	import { writable } from 'svelte/store';
 
 	export let state = writable(false);
+	export let disabled = false;
 
 	const dispatch = createEventDispatcher<{ state: boolean }>();
 	$: dispatch('state', $state);
 
 	const click = () => {
+		if (disabled) return;
 		state.update((state) => !state);
 	};
 </script>
@@ -16,7 +18,7 @@
 <!--  a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
 <div on:click={click} on:click on:keydown={handleTabCompletion} tabindex="0">
-	<div class="checkbox" class:active={$state}>
+	<div class="checkbox" class:active={$state} class:disabled>
 		{#if $state}
 			<svg viewBox="0 0 24 24">
 				<path d="M19 5L9 17l-5-5" />
@@ -39,6 +41,12 @@
 		border: 1px solid var(--text-faded-color);
 		background-color: var(--background-color-1);
 		transition: all 0.2s ease-in-out;
+
+		&.disabled {
+			opacity: 0.5;
+			pointer-events: none;
+			user-select: none;
+		}
 
 		&:hover {
 			background-color: var(--background-color-2);

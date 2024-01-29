@@ -4,9 +4,9 @@
 	import Glass from '$lib/glass';
 	import type { Server } from '$lib/glass/interfaces';
 	import { onDestroy, onMount } from 'svelte';
-	import Loader from '../styling/Loader.svelte';
 	import type { Terminal } from 'xterm';
 	import type { FitAddon } from 'xterm-addon-fit';
+	import ServerLoader from '../styling/ServerLoader.svelte';
 
 	let elem: HTMLElement;
 	let input: HTMLInputElement;
@@ -29,8 +29,8 @@
 			fitAddon = new FitAddon();
 
 			term = new Terminal({
-				fontFamily: 'JetBrains Mono',
-				fontWeight: '300'
+				fontFamily: 'JetBrains Mono, monospace',
+				fontWeight: '400'
 			});
 
 			term.write(`\x1b[?25l`);
@@ -63,6 +63,7 @@
 	};
 
 	const fetchLogs = (success) => {
+		if (!loading) return;
 		Glass.server(server.id)
 			.console.history()
 			.then((logs) => {
@@ -142,6 +143,7 @@
 	onDestroy(() => {
 		$socket?.emit('server:detach');
 		$socket?.off('console:log');
+		loading = false;
 	});
 </script>
 
@@ -150,17 +152,11 @@
 </head>
 
 <div class="wrapper">
-	<div class="container">
+	<div class="container" data-loading={loading}>
 		<div bind:this={elem} use:load />
 	</div>
-
 	{#if loading}
-		<div class="loader">
-			<Loader />
-			<p>Connecting to console</p>
-		</div>
-
-		<div class="loader" />
+		<ServerLoader height="100%" text={'Connecting to server'} />
 	{:else}
 		<form class="command" on:submit|preventDefault={execute}>
 			<span>$</span>
@@ -185,50 +181,13 @@
 	}
 
 	// make container take up most the space, but leave a little room for the command input
-	.container {
+	.container:not([data-loading='true']) {
 		width: 100%;
 		height: calc(100% - 2rem);
 
 		& > div {
 			width: 100%;
 			height: 100%;
-		}
-	}
-
-	.loader {
-		width: 100%;
-		height: 100%;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-
-		& p {
-			text-align: center;
-			width: 100%;
-
-			&::after {
-				content: '';
-				animation: dots 2s step-end infinite;
-
-				display: inline-block;
-				width: 0;
-			}
-		}
-	}
-
-	@keyframes dots {
-		0% {
-			content: '';
-		}
-		25% {
-			content: '.';
-		}
-		50% {
-			content: '..';
-		}
-		75% {
-			content: '...';
 		}
 	}
 

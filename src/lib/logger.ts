@@ -33,29 +33,37 @@ const getFuncForLevel = (level: Level) => {
 export class Logger {
 	constructor(private key: string) {}
 
-	public log(level: Level, message: string) {
+	public log(level: Level, ...message: any[]) {
 		getFuncForLevel(level)(
 			format
 				.replace('{level}', level)
 				.replace('{key}', this.key.toUpperCase())
-				.replace('{message}', message),
+				.replace(
+					'{message}',
+					message
+						.map((o) => {
+							if (typeof o === 'object') return JSON.stringify(o);
+							return o;
+						})
+						.join(' ')
+				),
 			...getCSS(level)
 		);
 	}
 
-	public info(message: string) {
-		this.log('INFO', message);
+	public info(...message: any[]) {
+		this.log('INFO', ...message);
 	}
 
-	public warn(message: string) {
-		this.log('WARN', message);
+	public warn(...message: any[]) {
+		this.log('WARN', ...message);
 	}
 
-	public error(message: string) {
-		this.log('ERROR', message);
+	public error(...message: any[]) {
+		this.log('ERROR', ...message);
 	}
 
-	public errorThenRetry(message: string) {
+	public errorThenRetry(...message: any[]) {
 		this.error(`${message}, retrying in 5 seconds...`);
 		setTimeout(() => {
 			location.reload();

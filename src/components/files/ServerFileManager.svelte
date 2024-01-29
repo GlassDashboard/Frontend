@@ -21,14 +21,19 @@
 	import File from './File.svelte';
 	import Checkbox from '../styling/Checkbox.svelte';
 	import { goto } from '$app/navigation';
-	import type { PageData } from '../../routes/$types';
 	import Glass from '$lib/glass';
 	import Dropzone from 'dropzone';
 	import { dropzone } from '../../stores/dropzone';
 	import Note from '../styling/Note.svelte';
 	import { FileUploadQueue } from '$lib/logic';
 	import UploadProgress from '../styling/UploadProgress.svelte';
-	import Skeleton from '../styling/Skeleton.svelte';
+	import ServerLoader from '../styling/ServerLoader.svelte';
+	import { Logger } from '$lib/logger';
+	import { load } from '../../routes/+layout';
+	import type { PageData } from '../../routes/panel/[server]/[[tab]]/[...data]/$types';
+	import FileEditor from './FileEditor.svelte';
+
+	const logger = new Logger('file-manager');
 
 	export let server: Server;
 	export let data: PageData;
@@ -44,7 +49,7 @@
 	let masterState: Writable<boolean> | undefined = undefined;
 	$: if (masterCheckbox) masterState = masterCheckbox.state;
 
-	const path = writable<string>('/');
+	const path = writable<string>('/' + data.extra);
 	const metadata = writable<FileMetadata>();
 	$: children = $metadata?.children?.sort(fileSorter) || [];
 
@@ -55,32 +60,33 @@
 	};
 
 	const fetch = (path: string) => {
-		loading = true;
+		if (!loading) return;
+		logger.info(`Getting file metadata for ${path}`);
 		$socket
 			?.timeout(5000)
 			.emit('file:metadata', path, (err: Error, data: FileMetadata) => {
 				if (err) {
+					logger.error(`Failed to get file metadata for ${path}`);
 					setTimeout(() => {
 						fetch(path);
 					}, 1000);
-
-					return console.error(err);
+				} else {
+					loading = false;
+					metadata.set(data);
 				}
-
-				loading = false;
-				metadata.set(data);
 			});
 	};
 
 	$: urlPath = $path.replace(/^\//, '');
 
 	const setPath = (location: string) => {
+		loading = true;
 		fetch(location);
 		path.set(location);
 
 		const url = data.current
 			?.replace('[...data]', location.substring(1))
-			.replace('[...tab]', 'files')
+			.replace('[[tab]]', 'files')
 			.replace('[server]', server.id);
 
 		if (!url) return;
@@ -109,6 +115,7 @@
 		},
 		getSelected: () => selected,
 		reload: () => {
+			loading = true;
 			fetch($path);
 			reset();
 		},
@@ -133,18 +140,16 @@
 		if (e.key === 'Shift') shifting = e.type === 'keydown';
 	};
 
-	const handleClick = (file: FileMetadata) => {
+	const handleClick = (event: MouseEvent, file: FileMetadata) => {
 		const checkbox = checkboxes[children.indexOf(file)];
-
 		if (!shifting) resetSelected([file]);
-		checkbox.state?.update((current) => !current);
 
-		if (
-			!shifting &&
-			file.directory &&
-			Date.now() - lastClick < 500 &&
-			lastFile === file
-		) {
+		const clicking = document.elementsFromPoint(event.clientX, event.clientY);
+		if (checkbox && !clicking.find((el) => el.classList.contains('checkbox'))) {
+			checkbox.state?.update((current) => !current);
+		}
+
+		if (!shifting && Date.now() - lastClick < 500 && lastFile === file) {
 			manager.forward(file.name);
 			checkbox.state?.set(false);
 		}
@@ -249,7 +254,9 @@
 		document.addEventListener('keyup', onKeyToggle);
 
 		$socket?.emit('server:attach', server.id);
+
 		setTimeout(() => {
+			loading = true;
 			fetch($path);
 		}, 200);
 
@@ -286,6 +293,7 @@
 		document.removeEventListener('keydown', onKeyToggle);
 		document.removeEventListener('keyup', onKeyToggle);
 		$dropzone?.disable();
+		loading = false;
 	});
 
 	setContext(FILE_MANAGER, manager);
@@ -297,31 +305,40 @@
 
 <div bind:this={div} class="manager">
 	<div class="header">
-		<Checkbox bind:this={masterCheckbox} on:click={handleMaster} />
+		{#if $metadata?.directory ?? true}
+			<Checkbox
+				bind:this={masterCheckbox}
+				on:click={handleMaster}
+				disabled={loading}
+			/>
+		{/if}
 		<Breadcrumbs path={$path} />
-		<div class="controls">
-			<div class="control">
-				{#if $queueStore != -1}
-					<UploadProgress progress={queueStore} />
-				{:else}
-					<span on:click={() => uploadFile()} class="gg-software-upload icon" />
+		{#if $metadata?.directory ?? true}
+			<div class="controls" class:disabled={loading}>
+				<div class="control">
+					{#if $queueStore != -1}
+						<UploadProgress progress={queueStore} />
+					{:else}
+						<span
+							on:click={() => uploadFile()}
+							class="gg-software-upload icon"
+						/>
+					{/if}
+				</div>
+				{#if $masterState}
+					<div class="red control">
+						<span on:click={() => deleteFiles()} class="gg-trash icon" />
+					</div>
 				{/if}
 			</div>
-			{#if $masterState}
-				<div class="red control">
-					<span on:click={() => deleteFiles()} class="gg-trash icon" />
-				</div>
-			{/if}
-		</div>
+		{/if}
 	</div>
 
 	{#if loading}
-		{#each { length: 10 } as _, index}
-			<Skeleton height={'2rem'} index={index / 2} />
-		{/each}
-	{:else}
+		<ServerLoader text={'Connecting to server'} />
+	{:else if $metadata?.directory ?? true}
 		{#each children as file, index}
-			<div class="file" on:click={() => handleClick(file)}>
+			<div class="file" on:click={(e) => handleClick(e, file)}>
 				<Checkbox
 					bind:this={checkboxes[index]}
 					on:state={(e) => handleCheckbox(e, file)}
@@ -329,6 +346,8 @@
 				<File metadata={file} />
 			</div>
 		{/each}
+	{:else}
+		<FileEditor file={$metadata} />
 	{/if}
 
 	<div class="note">
@@ -375,6 +394,12 @@
 		margin-left: auto;
 		display: flex;
 		gap: 1rem;
+
+		&.disabled {
+			opacity: 0.5;
+			pointer-events: none;
+			user-select: none;
+		}
 
 		& > .control {
 			display: flex;

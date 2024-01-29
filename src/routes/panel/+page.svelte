@@ -1,12 +1,13 @@
 <script lang="ts">
 	import RowHeader from '../../components/rows/RowHeader.svelte';
 	import Glass from '$lib/glass';
-	import type { ServerDetails } from '$lib/glass/interfaces';
+	import type { ServerDetails, ServerState } from '$lib/glass/interfaces';
 	import ServerRow from '../../components/rows/ServerRow.svelte';
 	import Skeleton from '../../components/styling/Skeleton.svelte';
 	import CreateRow from '../../components/rows/CreateRow.svelte';
-	import Note from '../../components/styling/Note.svelte';
 	import Error from '../../components/styling/Error.svelte';
+	import { onMount } from 'svelte';
+	import { socket } from '../../stores/socket';
 
 	let loading = true;
 	let reachable = true;
@@ -24,6 +25,20 @@
 	const manageServer = (server: ServerDetails) => {
 		location.href = `/panel/${server.id}`;
 	};
+
+	onMount(() => {
+		$socket?.on('server:status', (data) => {
+			const { id, status } = data;
+
+			servers = servers.map((s) => {
+				if (s.id !== id) return s;
+				return {
+					...s,
+					status
+				};
+			});
+		});
+	});
 </script>
 
 <main>

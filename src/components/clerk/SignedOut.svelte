@@ -1,12 +1,10 @@
-<script>
-	// @ts-nocheck
-
-	import { clerk } from '../../stores/clerk';
+<script lang="ts">
+	import { Logger } from '$lib/logger';
+	import type Clerk from '@clerk/clerk-js';
 	import PageLoader from '../styling/PageLoader.svelte';
+	export let clerk: Clerk;
 </script>
 
-{#if !$clerk}
-	<PageLoader />
-{:else if $clerk.user === null}
+{#if clerk.user === null}
 	<slot />
 {/if}

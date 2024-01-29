@@ -39,6 +39,8 @@
 
 		svg {
 			color: var(--badge-color);
+			border-radius: 50%;
+			box-shadow: 0px 0px 1px 1px #0000001a;
 			filter: brightness(1);
 		}
 	}
@@ -52,6 +54,10 @@
 	.online {
 		--badge-color-faded: var(--green-faded);
 		--badge-color: var(--green);
+
+		& > svg {
+			animation: pulse 2s ease-out infinite;
+		}
 	}
 
 	.offline {
@@ -67,5 +73,14 @@
 	.suspended {
 		--badge-color-faded: var(--orange-faded);
 		--badge-color: var(--orange);
+	}
+
+	@keyframes pulse {
+		0% {
+			box-shadow: 0 0 0 0px rgba(0, 0, 0, 0.2);
+		}
+		100% {
+			box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+		}
 	}
 </style>

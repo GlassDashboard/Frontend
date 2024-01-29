@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import type { User } from '@clerk/clerk-js/dist/types/core/resources/User';
 	import ServerConsole from '../../../../../components/console/ServerConsole.svelte';
 	import ServerFileManager from '../../../../../components/files/ServerFileManager.svelte';
 	import ServerHeader from '../../../../../components/server/ServerHeader.svelte';
@@ -12,12 +10,13 @@
 	import type { PageData } from './$types';
 	import ServerUsers from '../../../../../components/users/ServerUsers.svelte';
 
+	export let data: PageData;
+
 	let tabs: Tabs | undefined = undefined;
 	$: tab = data.tab == '' ? 'Console' : data.tab;
 
-	export let data: PageData;
 	$: server = $serverStore!;
-	$: isAdmin = $clerk!.user?.publicMetadata['admin'];
+	$: isAdmin = $clerk!.user?.publicMetadata['admin'] ?? false;
 </script>
 
 <main class="big">

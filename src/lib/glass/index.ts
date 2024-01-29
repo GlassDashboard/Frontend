@@ -28,7 +28,7 @@ function parsePermission(value: string | bigint): bigint {
 }
 
 let token: string;
-let axiosInstance: AxiosInstance;
+let axiosInstance: AxiosInstance | null;
 
 async function getAxios(): Promise<AxiosInstance> {
 	if (axiosInstance) return axiosInstance;
@@ -43,6 +43,10 @@ async function getAxios(): Promise<AxiosInstance> {
 		},
 		timeout: 5000
 	});
+
+	setTimeout(() => {
+		axiosInstance = null;
+	}, 50e3);
 
 	return axiosInstance;
 }

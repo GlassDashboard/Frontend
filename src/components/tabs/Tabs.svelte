@@ -24,7 +24,7 @@
 	import { createEventDispatcher, setContext } from 'svelte';
 	import { writable, type Writable } from 'svelte/store';
 	import TabHeader from './TabHeader.svelte';
-	import type { PageData } from '../../routes/panel/[server]/[...tab]/[...data]/$types';
+	import type { PageData } from '../../routes/panel/[server]/[[tab]]/[...data]/$types';
 	import { goto } from '$app/navigation';
 	import { Logger } from '$lib/logger';
 
@@ -84,7 +84,7 @@
 			let url = data.current
 				?.replace('[...data]', '')
 				?.replace(
-					'[...tab]',
+					'[[tab]]',
 					manager.index(tab) == 0 && !showFirst ? '' : tab.toLowerCase()
 				)
 				?.replace('[server]', data.server);
